@@ -219,18 +219,18 @@ def bees_app(doc):
 def callback():
     data_source.stream(get_data(), rollover=100)
 
-def listen():  
+# def listen():  
 
-    # Assign event callbacks
-    mqttc.on_message = on_message
-    mqttc.on_connect = on_connect
-    mqttc.on_subscribe = on_subscribe
+#     # Assign event callbacks
+#     mqttc.on_message = on_message
+#     mqttc.on_connect = on_connect
+#     mqttc.on_subscribe = on_subscribe
 
-    # Connect
-    mqttc.connect(MQTT_Broker, int(MQTT_Port), int(Keep_Alive_Interval))
+#     # Connect
+#     mqttc.connect(MQTT_Broker, int(MQTT_Port), int(Keep_Alive_Interval))
 
-    # Continue the network loop
-    mqttc.loop_forever()
+#     # Continue the network loop
+#     mqttc.loop_forever()
 
 # thread = Thread(target=listen)
 
