@@ -49,7 +49,7 @@ def Store_Telemetry_Data(data):
 	dbObj = DatabaseManager()
 	dbObj.add_del_update_db_record("insert into Telemetry_Data_Table (Timestamp, Temperature, Wieght, Humidity) values (?,?,?,?)",[Data_and_Time, Temperature, Wieght, Humidity])
 	del dbObj
-	# print ("Inserted Telemetry Data into Database.")
+	print ("Inserted Telemetry Data into Database.")
 	# print ("")
 
 # # Function to save Temperature to DB Table

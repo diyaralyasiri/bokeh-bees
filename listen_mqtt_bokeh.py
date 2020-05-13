@@ -25,6 +25,7 @@ def on_message(mosq, obj, msg):
 	data_dict = json.loads(msg_decoded)
 	print ("Data: " + str(data_dict))
 
+	Store_Telemetry_Data(data_dict)
 
 
 	#sensor_Data_Handler(msg.topic, data_dict)
@@ -32,6 +33,7 @@ def on_message(mosq, obj, msg):
 
 def on_subscribe(mosq, obj, mid, granted_qos):
     pass
+
 
 mqttc = mqtt.Client()
 
