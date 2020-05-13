@@ -8,46 +8,50 @@ from SQL_helper_functions import DatabaseManager
 import timeit
 import sqlite3
 import re
-from multiprocessing import Process
+# from multiprocessing import Process
 
-import paho.mqtt.client as mqtt
+# import paho.mqtt.client as mqtt
 import json
-from SQL_helper_functions import Store_Telemetry_Data
+# from SQL_helper_functions import Store_Telemetry_Data
 
-from threading import Thread
-
-mqttc = mqtt.Client()
-
-
-# MQTT Settings 
-MQTT_Broker = "mqtt.eclipse.org"
-MQTT_Port = 1883
-Keep_Alive_Interval = 45
-MQTT_Topic = "Connectedbees/Telemetry"
-
-#Subscribe to all Sensors at Base Topic
-def on_connect(mosq, obj, flag,rc):
-	mqttc.subscribe(MQTT_Topic, 0)
-	print("Subscribed to MQTT topic.")
-
-#Save Data into DB Table
-def on_message(mosq, obj, msg):
-	# This is the Master Call for saving MQTT Data into DB
-	# For details of "sensor_Data_Handler" function please refer "sensor_data_to_db.py"
-	print ("MQTT Data Received...")
-	print ("MQTT Topic: " + msg.topic)
-	msg_decoded = msg.payload.decode()
-	data_dict = json.loads(msg_decoded)
-	print ("Data: " + str(data_dict))
-
-	Store_Telemetry_Data(data_dict)
+from sqlalchemy import create_engine
+engine = create_engine('postgres://qeirlxsntkwbkn:4a53f53c6fd6d1b91f30a520a97e821364ca2c71b94c67711d2e5aaaced2c6dc@ec2-54-247-79-178.eu-west-1.compute.amazonaws.com:5432/ddqb75j223tb8c')
 
 
-	#sensor_Data_Handler(msg.topic, data_dict)
+# from threading import Thread
+
+# mqttc = mqtt.Client()
 
 
-def on_subscribe(mosq, obj, mid, granted_qos):
-    pass
+# # MQTT Settings 
+# MQTT_Broker = "mqtt.eclipse.org"
+# MQTT_Port = 1883
+# Keep_Alive_Interval = 45
+# MQTT_Topic = "Connectedbees/Telemetry"
+
+# #Subscribe to all Sensors at Base Topic
+# def on_connect(mosq, obj, flag,rc):
+# 	mqttc.subscribe(MQTT_Topic, 0)
+# 	print("Subscribed to MQTT topic.")
+
+# #Save Data into DB Table
+# def on_message(mosq, obj, msg):
+# 	# This is the Master Call for saving MQTT Data into DB
+# 	# For details of "sensor_Data_Handler" function please refer "sensor_data_to_db.py"
+# 	print ("MQTT Data Received...")
+# 	print ("MQTT Topic: " + msg.topic)
+# 	msg_decoded = msg.payload.decode()
+# 	data_dict = json.loads(msg_decoded)
+# 	print ("Data: " + str(data_dict))
+
+# 	Store_Telemetry_Data(data_dict)
+
+
+# 	#sensor_Data_Handler(msg.topic, data_dict)
+
+
+# def on_subscribe(mosq, obj, mid, granted_qos):
+#     pass
 
 
 def parse_input_time(input):
@@ -59,10 +63,10 @@ def parse_input_time(input):
     return datetime
 
 def get_data():
-    conn = sqlite3.connect("Bee_Telemetry_Database.db")
-    df_telemetry = pd.read_sql_query("SELECT Timestamp, Temperature, Wieght, Humidity FROM Telemetry_Data_Table ORDER BY id DESC LIMIT 100", conn,
-                                     parse_dates=['Timestamp'])
-    conn.close()
+    # conn = sqlite3.connect("app/data_analysis/Bee_Telemetry_Database.db")
+    df_telemetry = pd.read_sql_query('SELECT timestamp, temperature, weight, humidity FROM telemetry_data_table ORDER BY id DESC LIMIT 100', con=engine,
+                                     parse_dates=['timestamp'])
+    # conn.close()
 
     return df_telemetry
 
@@ -88,17 +92,17 @@ def plotgraphs(data_source):
                                                    milliseconds=["%M:%Ss"],
                                                    seconds=["%m/%d %H:%M:%Ss"])
 
-    t_plot.line('Timestamp', 'Temperature', source=data_source, line_width=2, color='#66CCCC')
+    t_plot.line('timestamp', 'temperature', source=data_source, line_width=2, color='#66CCCC')
 
     t_plot.add_tools(HoverTool(
         tooltips=[
-            ('Temperature', '@Temperature °C'),
-            ('Timestamp', '@Timestamp{%Y/%m/%d %H:%M:%Ss}'),
+            ('Temperature', '@temperature °C'),
+            ('Timestamp', '@timestamp{%Y/%m/%d %H:%M:%Ss}'),
         ],
 
         formatters={
-            '@Temperature': 'numeral',
-            '@Timestamp': 'datetime',
+            '@temperature': 'numeral',
+            '@timestamp': 'datetime',
         },
         mode='vline'
     ))
@@ -121,17 +125,17 @@ def plotgraphs(data_source):
                                                    milliseconds=["%M:%Ss"],
                                                    seconds=["%m/%d %H:%M:%Ss"])
 
-    h_plot.line('Timestamp', 'Humidity', source=data_source, line_width=2, color='#66CCCC')
+    h_plot.line('timestamp', 'humidity', source=data_source, line_width=2, color='#66CCCC')
 
     h_plot.add_tools(HoverTool(
         tooltips=[
-            ('Humidity', '@Humidity %'),
-            ('Timestamp', '@Timestamp{%Y/%m/%d %H:%M:%Ss}'),
+            ('Humidity', '@humidity %'),
+            ('Timestamp', '@timestamp{%Y/%m/%d %H:%M:%Ss}'),
         ],
 
         formatters={
-            '@Humidity': 'numeral',
-            '@Timestamp': 'datetime',
+            '@humidity': 'numeral',
+            '@timestamp': 'datetime',
         },
         mode='vline'
     ))
@@ -153,17 +157,17 @@ def plotgraphs(data_source):
                                                    milliseconds=["%M:%Ss"],
                                                    seconds=["%m/%d %H:%M:%Ss"])
 
-    w_plot.line('Timestamp', 'Wieght', source=data_source, line_width=2, color='#66CCCC')
+    w_plot.line('timestamp', 'weight', source=data_source, line_width=2, color='#66CCCC')
 
     w_plot.add_tools(HoverTool(
         tooltips=[
-            ('Wieght', '@Wieght Kg'),
-            ('Timestamp', '@Timestamp{%Y/%m/%d %H:%M:%Ss}'),
+            ('Wieght', '@weight Kg'),
+            ('Timestamp', '@timestamp{%Y/%m/%d %H:%M:%Ss}'),
         ],
 
         formatters={
-            '@Wieght': 'numeral',
-            '@Timestamp': 'datetime',
+            '@weight': 'numeral',
+            '@timestamp': 'datetime',
         },
         mode='vline'
     ))
@@ -177,15 +181,15 @@ def plotgraphs(data_source):
 def get_data_filtered(t1, t2):
     """Function to get time filtered data from SQL database to pandas dataframe"""
 
-    conn = sqlite3.connect("Bee_Telemetry_Database.db")
+    # conn = sqlite3.connect("app/data_analysis/Bee_Telemetry_Database.db")
 
     df_telemetry = pd.read_sql_query(
-        "SELECT Timestamp, Temperature, Wieght, Humidity FROM Telemetry_Data_Table where Timestamp >= (?)  and Timestamp <= (?) ",
-        conn, params=(t1, t2),
-        parse_dates=['Timestamp'],
+        "SELECT timestamp, temperature, weight, humidity FROM telemetry_data_table where Timestamp >= %s  and Timestamp <= %s ",
+        con=engine, params=[t1, t2],
+        parse_dates=['timestamp']
         )
 
-    conn.close()
+    # conn.close()
 
     return df_telemetry
 
@@ -228,12 +232,9 @@ def listen():
     # Continue the network loop
     mqttc.loop_forever()
 
-thread = Thread(target=listen)
+# thread = Thread(target=listen)
 
-thread.start()
-
-
-
+# thread.start()
 bokeh_doc = curdoc()
 data = get_data()
 data_source = ColumnDataSource(data)
