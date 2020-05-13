@@ -16,6 +16,9 @@ from SQL_helper_functions import Store_Telemetry_Data
 
 from threading import Thread
 
+mqttc = mqtt.Client()
+
+
 # MQTT Settings 
 MQTT_Broker = "mqtt.eclipse.org"
 MQTT_Port = 1883
@@ -213,7 +216,6 @@ def callback():
     data_source.stream(get_data(), rollover=100)
 
 def listen():  
-    mqttc = mqtt.Client()
 
     # Assign event callbacks
     mqttc.on_message = on_message
@@ -226,9 +228,11 @@ def listen():
     # Continue the network loop
     mqttc.loop_forever()
 
-# thread = Thread(target=listen)
+thread = Thread(target=listen)
 
-# thread.start()
+thread.start()
+
+
 
 bokeh_doc = curdoc()
 data = get_data()
